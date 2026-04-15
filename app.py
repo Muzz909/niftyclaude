@@ -29,6 +29,9 @@ from datetime import datetime, time
 import pytz
 import logging
 
+IST = pytz.timezone("Asia/Kolkata")
+now_ist = datetime.now(IST)
+
 # ── optional NSE scraper (may fail — handled gracefully) ──────────────────────
 try:
     from nsepython import nse_optionchain_scrapper
@@ -144,8 +147,7 @@ with top_right:
 if auto:
     st_autorefresh(interval=30_000, key="autorefresh")
 
-IST = pytz.timezone("Asia/Kolkata")
-now_ist = datetime.now(IST)
+
 st.caption(f"Last updated: {now_ist.strftime('%d %b %Y  %H:%M:%S IST')}")
 market_status = "🟢 Market Open" if is_market_hours else "🔴 Market Closed"
 st.caption(f"{market_status} · Last updated: {now_ist.strftime('%d %b %Y  %H:%M:%S IST')}")
