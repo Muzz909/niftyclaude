@@ -243,7 +243,8 @@ data["Roll20H"] = data["High"].rolling(20).max()
 data["Roll20L"] = data["Low"].rolling(20).min()
 
 # Drop rows where indicators aren't ready
-data = data.dropna(subset=["EMA20", "EMA50", "RSI", "VWAP", "ATR"])
+# data = data.dropna(subset=["EMA20", "EMA50", "RSI", "VWAP", "ATR"])
+data = data.dropna(subset=["EMA50"]).copy()
 
 if len(data) < 3:
     st.warning("⏳ Indicators still warming up — needs a few more bars.")
