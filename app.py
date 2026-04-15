@@ -650,6 +650,46 @@ else:
 # ── 3. CHART ─────────────────────────────────────────────────────────────────
 st.plotly_chart(build_chart(data, price, vwap), use_container_width=True)
 
+# ── 4. CONTEXT METRICS ROW ───────────────────────────────────────────────────
+c1, c2, c3, c4, c5, c6 = st.columns(6)
+c1.metric("NIFTY", f"{price:,.2f}", f"{change_5m_pct:+.2f}%")
+c2.metric("RSI (Wilder)", f"{rsi:.1f}", help="Overbought >70 · Oversold <30 · Signal uses 55/45")
+c3.metric("VWAP", f"{vwap:,.2f}", f"{'Above ✓' if price > vwap else 'Below ✗'}")
+c4.metric("EMA 20 / 50", f"{ema20:,.1f} / {ema50:,.1f}", f"{'Bull ✓' if ema20 > ema50 else 'Bear ✗'}")
+c5.metric("ATR (5-min)", f"{atr:,.2f}", f"{atr/price*100:.2f}% of price")
+pcr_display = f"{pcr:.2f}" if pcr else "N/A"
+c6.metric("PCR", pcr_display, help="0.85–1.15 neutral · >1.3 panic hedge · <0.7 complacency")
+
+if pcr is None:
+    if not NSE_AVAILABLE:
+        st.caption("⚠️ nsepython not installed — PCR unavailable. Run: `pip install nsepython`")
+    else:
+        st.caption("⚠️ NSE option chain unavailable right now — PCR excluded from score")
+
+# ── 5. SIGNAL REASONS ────────────────────────────────────────────────────────
+st.markdown("**Why this signal?**")
+pills_html = ""
+for text, direction in reasons:
+    pills_html += f'<span class="reason-pill {direction}">{text}</span>'
+st.markdown(pills_html, unsafe_allow_html=True)
+
+st.markdown("<div style='margin-top:0.3rem'></div>", unsafe_allow_html=True)
+
+# ── 6. CANDLE DETAIL (collapsed — for those who want it) ─────────────────────
+with st.expander("🕯️ Last 5-min Candle Story Detail (click to expand)"):
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.metric("Candle type", candle_type)
+        st.metric("Pattern", candle_pattern or "None")
+        st.metric("Body %", f"{body_pct:.1f}%")
+    with col_b:
+        st.metric("Upper wick %", f"{upper_wick_pct:.1f}%")
+        st.metric("Lower wick %", f"{lower_wick_pct:.1f}%")
+        st.metric("Candle range", f"{rng:.2f}")
+    with col_c:
+        st.metric("Open", f"{o:,.2f}")
+        st.metric("High", f"{h:,.2f}")
+        st.metric("Low", f"{l_:,.2f}")
 
 
 def generate_day_summary(df: pd.DataFrame) -> dict:
@@ -746,9 +786,10 @@ if not is_market_hours:
     s = day_summary
 
     st.markdown("### 🧾 Day Summary")
-
     st.markdown(f"""
-    <div style="background:#111827;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
+    <div style="background:#111827;padding:16px 20px;border-radius:12px;border:1px solid #2a3040;line-height:1.6">
+
+    <div style="font-size:1.05rem;color:#ffffff">
 
     <b>📊 Market Behaviour:</b><br>
     {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
@@ -766,48 +807,32 @@ if not is_market_hours:
     {s['outlook']}
 
     </div>
-    """, unsafe_allow_html=True)
 
-# ── 4. CONTEXT METRICS ROW ───────────────────────────────────────────────────
-c1, c2, c3, c4, c5, c6 = st.columns(6)
-c1.metric("NIFTY", f"{price:,.2f}", f"{change_5m_pct:+.2f}%")
-c2.metric("RSI (Wilder)", f"{rsi:.1f}", help="Overbought >70 · Oversold <30 · Signal uses 55/45")
-c3.metric("VWAP", f"{vwap:,.2f}", f"{'Above ✓' if price > vwap else 'Below ✗'}")
-c4.metric("EMA 20 / 50", f"{ema20:,.1f} / {ema50:,.1f}", f"{'Bull ✓' if ema20 > ema50 else 'Bear ✗'}")
-c5.metric("ATR (5-min)", f"{atr:,.2f}", f"{atr/price*100:.2f}% of price")
-pcr_display = f"{pcr:.2f}" if pcr else "N/A"
-c6.metric("PCR", pcr_display, help="0.85–1.15 neutral · >1.3 panic hedge · <0.7 complacency")
+</div>
+""", unsafe_allow_html=True)
 
-if pcr is None:
-    if not NSE_AVAILABLE:
-        st.caption("⚠️ nsepython not installed — PCR unavailable. Run: `pip install nsepython`")
-    else:
-        st.caption("⚠️ NSE option chain unavailable right now — PCR excluded from score")
+    # st.markdown(f"""
+    # <div style="background:#111827;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
 
-# ── 5. SIGNAL REASONS ────────────────────────────────────────────────────────
-st.markdown("**Why this signal?**")
-pills_html = ""
-for text, direction in reasons:
-    pills_html += f'<span class="reason-pill {direction}">{text}</span>'
-st.markdown(pills_html, unsafe_allow_html=True)
+    # <b>📊 Market Behaviour:</b><br>
+    # {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
 
-st.markdown("<div style='margin-top:0.3rem'></div>", unsafe_allow_html=True)
+    # <b>⚡ Key Move:</b><br>
+    # {s['key_move']}<br><br>
 
-# ── 6. CANDLE DETAIL (collapsed — for those who want it) ─────────────────────
-with st.expander("🕯️ Last 5-min Candle Story Detail (click to expand)"):
-    col_a, col_b, col_c = st.columns(3)
-    with col_a:
-        st.metric("Candle type", candle_type)
-        st.metric("Pattern", candle_pattern or "None")
-        st.metric("Body %", f"{body_pct:.1f}%")
-    with col_b:
-        st.metric("Upper wick %", f"{upper_wick_pct:.1f}%")
-        st.metric("Lower wick %", f"{lower_wick_pct:.1f}%")
-        st.metric("Candle range", f"{rng:.2f}")
-    with col_c:
-        st.metric("Open", f"{o:,.2f}")
-        st.metric("High", f"{h:,.2f}")
-        st.metric("Low", f"{l_:,.2f}")
+    # <b>🧠 Control:</b><br>
+    # {s['control']} · Close: {s['close']:.0f} · Day High: {s['high']:.0f} · Day Low: {s['low']:.0f}<br><br>
+
+    # <b>🔁 Context:</b><br>
+    # {s['continuation']}<br><br>
+
+    # <b>🔮 Tomorrow:</b><br>
+    # {s['outlook']}
+
+    # </div>
+    # """, unsafe_allow_html=True)
+
+
 
 # ── 7. FOOTER ────────────────────────────────────────────────────────────────
 st.markdown("---")
