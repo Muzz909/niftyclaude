@@ -270,7 +270,7 @@ change_5m_pct = change_5m / float(prev["Close"]) * 100
 
 # Regime: if price range of last 20 bars < 0.4% → sideways
 recent_range_pct = (roll20h - roll20l) / price
-regime = "SIDEWAYS" if recent_range_pct < 0.004 else "TRENDING"
+regime = "SIDEWAYS / No Clear Direction" if recent_range_pct < 0.004 else "TRENDING"
 
 # Breakout / breakdown vs. 20-bar rolling levels (exclude current bar)
 roll20h_prev = float(data["Roll20H"].iloc[-2])
@@ -387,6 +387,46 @@ else:
     sig_class = "neutral"
 
 confidence = (abs(score) / max_possible * 100) if max_possible > 0 else 0
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# WHAT CHANGED INSIGHT
+# ─────────────────────────────────────────────────────────────────────────────
+what_changed = ""
+
+if bullish_breakout and price > vwap:
+    what_changed = "Breakout above recent highs + price above VWAP"
+elif bearish_breakdown and price < vwap:
+    what_changed = "Breakdown below recent lows + price below VWAP"
+elif price > vwap:
+    what_changed = "Price holding above VWAP (buyers active)"
+elif price < vwap:
+    what_changed = "Price below VWAP (sellers active)"
+
+if what_changed:
+    st.markdown(f"""
+    <p style="font-size:0.9rem;color:#9ca3af;margin-top:-0.4rem;margin-bottom:0.6rem">
+    🧠 <b>What changed:</b> {what_changed}
+    </p>
+    """, unsafe_allow_html=True)
+
+
+# ── ACTION CONTEXT ───────────────────────────────────────────────────
+action_note = ""
+
+if sig_class == "bullish":
+    action_note = "Momentum building — early entry opportunity"
+elif sig_class == "bearish":
+    action_note = "Downside pressure increasing — short setups favorable"
+else:
+    action_note = "No clear edge — avoid low-quality trades"
+
+st.markdown(f"""
+<p style="font-size:0.85rem;color:#6b7280;margin-top:-0.5rem;margin-bottom:0.8rem">
+{action_note}
+</p>
+""", unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # ENTRY / SL / TARGET (ATR-based, 1.5R)
@@ -540,7 +580,8 @@ st.markdown(f"""
 <div class="signal-card {sig_class}">
   <div>
     <div class="signal-label {sig_class}">{signal}</div>
-    <div class="signal-conf">Confidence: {confidence:.0f}% &nbsp;|&nbsp; Score: {score:+d} / {max_possible} &nbsp;|&nbsp; Regime: {regime}</div>
+    <div class="signal-conf">Signal Strength: {confidence:.0f}% &nbsp;|&nbsp; Score: {score:+d} / {max_possible} &nbsp;|&nbsp; Market: {regime}</div>
+    # <div class="signal-conf">Confidence: {confidence:.0f}% &nbsp;|&nbsp; Score: {score:+d} / {max_possible} &nbsp;|&nbsp; Regime: {regime}</div>
   </div>
   <div style="min-width:180px;">
     <div class="score-bar-wrap">
@@ -620,7 +661,8 @@ st.markdown(pills_html, unsafe_allow_html=True)
 st.markdown("<div style='margin-top:0.3rem'></div>", unsafe_allow_html=True)
 
 # ── 6. CANDLE DETAIL (collapsed — for those who want it) ─────────────────────
-with st.expander("🕯️ Candle detail (click to expand)"):
+with st.expander("🕯️ Last 5-min Candle Story Detail (click to expand)"):
+     st.caption("Breakdown of the most recent 5-minute candle — shows how price moved within that time.")
     col_a, col_b, col_c = st.columns(3)
     with col_a:
         st.metric("Candle type", candle_type)
