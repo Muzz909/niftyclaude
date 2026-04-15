@@ -662,7 +662,6 @@ st.markdown("<div style='margin-top:0.3rem'></div>", unsafe_allow_html=True)
 
 # ── 6. CANDLE DETAIL (collapsed — for those who want it) ─────────────────────
 with st.expander("🕯️ Last 5-min Candle Story Detail (click to expand)"):
-     st.caption("Breakdown of the most recent 5-minute candle — shows how price moved within that time.")
     col_a, col_b, col_c = st.columns(3)
     with col_a:
         st.metric("Candle type", candle_type)
