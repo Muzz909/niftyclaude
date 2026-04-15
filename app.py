@@ -786,10 +786,9 @@ if not is_market_hours:
     s = day_summary
 
     st.markdown("### 🧾 Day Summary")
-    st.markdown(f"""
-    <div style="background:#111827;padding:16px 20px;border-radius:12px;border:1px solid #2a3040;line-height:1.6">
 
-    <div style="font-size:1.05rem;color:#ffffff">
+    st.markdown(f"""
+    <div style="background:#1f2937;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
 
     <b>📊 Market Behaviour:</b><br>
     {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
@@ -807,30 +806,7 @@ if not is_market_hours:
     {s['outlook']}
 
     </div>
-
-</div>
-""", unsafe_allow_html=True)
-
-    # st.markdown(f"""
-    # <div style="background:#111827;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
-
-    # <b>📊 Market Behaviour:</b><br>
-    # {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
-
-    # <b>⚡ Key Move:</b><br>
-    # {s['key_move']}<br><br>
-
-    # <b>🧠 Control:</b><br>
-    # {s['control']} · Close: {s['close']:.0f} · Day High: {s['high']:.0f} · Day Low: {s['low']:.0f}<br><br>
-
-    # <b>🔁 Context:</b><br>
-    # {s['continuation']}<br><br>
-
-    # <b>🔮 Tomorrow:</b><br>
-    # {s['outlook']}
-
-    # </div>
-    # """, unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 
 
