@@ -142,7 +142,7 @@ st.caption(f"Last updated: {now_ist.strftime('%d %b %Y  %H:%M:%S IST')}")
 # ─────────────────────────────────────────────────────────────────────────────
 @st.cache_data(ttl=30)
 def load_ohlcv() -> pd.DataFrame:
-    df = yf.download("^NSEI", period="5d", interval="5m", progress=False)
+    df = yf.download("^NSEI", period="8d", interval="5m", progress=False)
     if df.empty:
         return df
     if isinstance(df.columns, pd.MultiIndex):
