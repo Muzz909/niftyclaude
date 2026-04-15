@@ -125,7 +125,18 @@ top_left, top_right = st.columns([7, 2])
 with top_left:
     st.markdown("## 📊 NIFTY Live Sentiment Dashboard")
 with top_right:
-    auto = st.toggle("Auto-refresh (30s)", value=True)
+    market_open = time(9, 15)
+    market_close = time(15, 30)
+
+    is_market_hours = market_open <= now_ist.time() <= market_close
+
+    auto = st.toggle(
+        "Auto-refresh (30s)",
+        value=is_market_hours,
+        disabled=True  # user cannot override
+    )
+# with top_right:
+#     auto = st.toggle("Auto-refresh (30s)", value=True)
     if st.button("⟳ Force refresh", use_container_width=True):
         st.cache_data.clear()
         st.rerun()
@@ -136,6 +147,8 @@ if auto:
 IST = pytz.timezone("Asia/Kolkata")
 now_ist = datetime.now(IST)
 st.caption(f"Last updated: {now_ist.strftime('%d %b %Y  %H:%M:%S IST')}")
+market_status = "🟢 Market Open" if is_market_hours else "🔴 Market Closed"
+st.caption(f"{market_status} · Last updated: {now_ist.strftime('%d %b %Y  %H:%M:%S IST')}")
 
 # ─────────────────────────────────────────────────────────────────────────────
 # DATA FETCH
