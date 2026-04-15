@@ -788,7 +788,8 @@ if not is_market_hours:
     st.markdown("### 🧾 Day Summary")
 
     st.markdown(f"""
-    <div style="background:#1f2937;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
+    # <div style="background:#1f2937;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
+    <div style="background:#111827;padding:14px 18px;border-radius:12px;border:1px solid #2a3040;color:#ffffff;">
 
     <b>📊 Market Behaviour:</b><br>
     {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
