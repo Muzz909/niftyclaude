@@ -650,6 +650,34 @@ else:
 # ── 3. CHART ─────────────────────────────────────────────────────────────────
 st.plotly_chart(build_chart(data, price, vwap), use_container_width=True)
 
+# ── Summary ─────────────────────────────────────────────────────────────────
+
+if not is_market_hours:
+    s = day_summary
+
+    st.markdown("### 🧾 Day Summary")
+
+    st.markdown(f"""
+    <div style="background:#111827;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
+
+    <b>📊 Market Behaviour:</b><br>
+    {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
+
+    <b>⚡ Key Move:</b><br>
+    {s['key_move']}<br><br>
+
+    <b>🧠 Control:</b><br>
+    {s['control']} · Close: {s['close']:.0f} · Day High: {s['high']:.0f} · Day Low: {s['low']:.0f}<br><br>
+
+    <b>🔁 Context:</b><br>
+    {s['continuation']}<br><br>
+
+    <b>🔮 Tomorrow:</b><br>
+    {s['outlook']}
+
+    </div>
+    """, unsafe_allow_html=True)
+
 # ── 4. CONTEXT METRICS ROW ───────────────────────────────────────────────────
 c1, c2, c3, c4, c5, c6 = st.columns(6)
 c1.metric("NIFTY", f"{price:,.2f}", f"{change_5m_pct:+.2f}%")
@@ -698,3 +726,95 @@ st.caption(
     "Always paper-trade a setup before going live. "
     "Signals are based on 5-min bars; refresh lag is ≤30s."
 )
+
+
+
+
+
+def generate_day_summary(df: pd.DataFrame) -> dict:
+    df = df.copy()
+    df["date"] = df.index.date
+
+    today = df["date"].iloc[-1]
+    yesterday = df["date"].iloc[-2]
+
+    today_df = df[df["date"] == today]
+    yest_df  = df[df["date"] == yesterday]
+
+    # ── BASIC NUMBERS ─────────────────────────────────────────────
+    open_price  = today_df["Open"].iloc[0]
+    close_price = today_df["Close"].iloc[-1]
+    high_price  = today_df["High"].max()
+    low_price   = today_df["Low"].min()
+
+    change_pct = (close_price - open_price) / open_price * 100
+    range_pct  = (high_price - low_price) / close_price * 100
+
+    # ── TREND ────────────────────────────────────────────────────
+    if change_pct > 0.3:
+        trend = "uptrend"
+    elif change_pct < -0.3:
+        trend = "downtrend"
+    else:
+        trend = "sideways"
+
+    # ── VOLATILITY ───────────────────────────────────────────────
+    if range_pct > 1.2:
+        volatility = "high volatility"
+    elif range_pct > 0.6:
+        volatility = "moderate movement"
+    else:
+        volatility = "low volatility"
+
+    # ── CONTROL (VWAP based) ─────────────────────────────────────
+    last_close = today_df["Close"].iloc[-1]
+    last_vwap  = today_df["VWAP"].iloc[-1]
+
+    if last_close > last_vwap:
+        control = "buyers in control"
+    else:
+        control = "sellers in control"
+
+    # ── YESTERDAY COMPARISON ─────────────────────────────────────
+    y_open  = yest_df["Open"].iloc[0]
+    y_close = yest_df["Close"].iloc[-1]
+    y_change = (y_close - y_open) / y_open * 100
+
+    if (change_pct > 0 and y_change > 0) or (change_pct < 0 and y_change < 0):
+        continuation = "trend continued from yesterday"
+    else:
+        continuation = "trend changed vs yesterday"
+
+    # ── KEY MOVE (simple logic) ──────────────────────────────────
+    if close_price > yest_df["High"].max():
+        key_move = "strong breakout above yesterday’s high"
+    elif close_price < yest_df["Low"].min():
+        key_move = "breakdown below yesterday’s low"
+    else:
+        key_move = "no major breakout — range-bound behaviour"
+
+    # ── TOMORROW CONTEXT ─────────────────────────────────────────
+    if trend == "uptrend" and control == "buyers in control":
+        outlook = "bullish bias — dips may get bought"
+    elif trend == "downtrend" and control == "sellers in control":
+        outlook = "bearish bias — rallies may get sold"
+    else:
+        outlook = "mixed signals — wait for clear direction"
+
+    return {
+        "trend": trend,
+        "change_pct": change_pct,
+        "range_pct": range_pct,
+        "volatility": volatility,
+        "control": control,
+        "continuation": continuation,
+        "key_move": key_move,
+        "outlook": outlook,
+        "high": high_price,
+        "low": low_price,
+        "close": close_price
+    }
+
+
+
+day_summary = generate_day_summary(data)
