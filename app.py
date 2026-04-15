@@ -782,32 +782,61 @@ day_summary = generate_day_summary(data)
 
 # ── Summary ─────────────────────────────────────────────────────────────────
 
+# if not is_market_hours:
+#     s = day_summary
+
+#     st.markdown("### 🧾 Day Summary")
+
+#     st.markdown(f"""
+#     # <div style="background:#1f2937;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
+#     <div style="background:#111827;padding:14px 18px;border-radius:12px;border:1px solid #2a3040;color:#ffffff;">
+
+#     <b>📊 Market Behaviour:</b><br>
+#     {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
+
+#     <b>⚡ Key Move:</b><br>
+#     {s['key_move']}<br><br>
+
+#     <b>🧠 Control:</b><br>
+#     {s['control']} · Close: {s['close']:.0f} · Day High: {s['high']:.0f} · Day Low: {s['low']:.0f}<br><br>
+
+#     <b>🔁 Context:</b><br>
+#     {s['continuation']}<br><br>
+
+#     <b>🔮 Tomorrow:</b><br>
+#     {s['outlook']}
+
+#     </div>
+#     """, unsafe_allow_html=True)
+
 if not is_market_hours:
     s = day_summary
 
-    st.markdown("### 🧾 Day Summary")
+    st.markdown("### 🧾 Market Summary (Trader View)")
 
     st.markdown(f"""
-    # <div style="background:#1f2937;padding:14px 18px;border-radius:12px;border:1px solid #2a3040">
-    <div style="background:#111827;padding:14px 18px;border-radius:12px;border:1px solid #2a3040;color:#ffffff;">
+<div style="background:#111827;padding:16px 20px;border-radius:12px;border:1px solid #2a3040;color:#ffffff;line-height:1.7;font-size:1.02rem">
 
-    <b>📊 Market Behaviour:</b><br>
-    {s['trend'].capitalize()} ({s['change_pct']:.2f}%) · Range: {s['range_pct']:.2f}% · {s['volatility']}<br><br>
+<b>📊 Day Structure:</b><br>
+Closed {s['trend']} with {s['change_pct']:.2f}% move.  
+Range: {s['range_pct']:.2f}% → {s['volatility']}.<br><br>
 
-    <b>⚡ Key Move:</b><br>
-    {s['key_move']}<br><br>
+<b>⚡ Key Action:</b><br>
+{s['key_move']} (compared to yesterday’s range).<br><br>
 
-    <b>🧠 Control:</b><br>
-    {s['control']} · Close: {s['close']:.0f} · Day High: {s['high']:.0f} · Day Low: {s['low']:.0f}<br><br>
+<b>🧠 Market Control:</b><br>
+{s['control']}.  
+Close at <b>{s['close']:.0f}</b> vs Day High <b>{s['high']:.0f}</b> / Low <b>{s['low']:.0f}</b>.<br><br>
 
-    <b>🔁 Context:</b><br>
-    {s['continuation']}<br><br>
+<b>📍 Structure Context:</b><br>
+{s['continuation']}.  
+This confirms whether momentum carried from yesterday or flipped.<br><br>
 
-    <b>🔮 Tomorrow:</b><br>
-    {s['outlook']}
+<b>🔮 Tomorrow Setup:</b><br>
+{s['outlook']}.
 
-    </div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
 
 
 
